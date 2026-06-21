@@ -13,35 +13,89 @@ body {
     margin: 20px;
 }
 
-/* =========================
-   HEADERS
-   ========================= */
-h1 { color: #00cc66; } /* NORMAL = GREEN */
-body.colorblind h1 { color: #4b81ff; }
+h1 { color: #00cc66; }
 
-/* =========================
-   CONTROLS
-   ========================= */
 .controls {
     margin: 10px 0;
     display: flex;
     flex-wrap: wrap;
     gap: 10px;
+    align-items: center;
 }
 
 .display-options {
-    margin: 10px 0;
+    margin: 10px 0 0;
     display: flex;
-    gap: 15px;
+    flex-wrap: wrap;
+    gap: 12px;
+    align-items: center;
 }
 
 .toggle-option {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
     font-size: 13px;
+    color: #dddddd;
 }
 
-/* =========================
-   TABLE
-   ========================= */
+.toggle-option input {
+    accent-color: #00cc66;
+}
+
+.legend {
+    margin: 6px 0 14px;
+    padding: 10px 12px;
+    border: 1px solid #444;
+    border-radius: 6px;
+    background: #222222;
+    display: flex;
+    flex-wrap: wrap;
+    gap: 12px 18px;
+    align-items: center;
+    font-size: 12px;
+    color: #dddddd;
+}
+
+.legend-item {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+}
+
+.legend-swatch {
+    width: 12px;
+    height: 12px;
+    border-radius: 999px;
+    border: 1px solid #666;
+    flex: 0 0 12px;
+}
+
+.legend-swatch.online {
+    background: #00ff88;
+    border-color: #00ff88;
+}
+
+.legend-swatch.attackable {
+    background: rgba(0, 255, 0, 0.14);
+    border-color: #00ff66;
+}
+
+.legend-swatch.colorblind {
+    background: #4b81ff;
+    border-color: #4b81ff;
+}
+
+label { font-size: 13px; }
+
+input, select, button {
+    padding: 6px;
+    border-radius: 4px;
+    border: none;
+}
+
+button { cursor: pointer; }
+
 table {
     width: 100%;
     border-collapse: collapse;
@@ -51,15 +105,41 @@ table {
 th, td {
     border: 1px solid #444;
     padding: 8px;
+    text-align: left;
 }
 
 th { background: #2d2d2d; }
 
 tr:nth-child(even) { background: #252525; }
 
-/* =========================
-   LIFE BAR
-   ========================= */
+.attackable {
+    background: rgba(0, 255, 0, 0.08);
+}
+
+body.colorblind-mode .attackable {
+    background: rgba(75, 129, 255, 0.14);
+    box-shadow: inset 4px 0 0 #4b81ff;
+}
+
+body.high-contrast-mode {
+    background: #111111;
+    color: #ffffff;
+}
+
+body.high-contrast-mode th,
+body.high-contrast-mode td {
+    border-color: #666666;
+}
+
+body.high-contrast-mode .attackable {
+    background: rgba(255, 255, 255, 0.08);
+}
+
+.top-level {
+    box-shadow: inset 0 0 10px rgba(255, 215, 0, 0.4);
+    border-left: 3px solid gold;
+}
+
 .life-bar {
     width: 100%;
     height: 10px;
@@ -70,74 +150,36 @@ tr:nth-child(even) { background: #252525; }
 
 .life-fill {
     height: 100%;
+    background: linear-gradient(90deg, #00ff66, #ffcc00, #ff4444);
     transition: width 0.3s ease;
 }
 
-/* NORMAL MODE (GREEN SYSTEM) */
-body:not(.colorblind) .life-fill.high {
-    background: #00ff66;
-}
-
-body:not(.colorblind) .life-fill.mid {
-    background: #ffcc00;
-}
-
-body:not(.colorblind) .life-fill.low {
-    background: #ff4444;
-}
-
-/* =========================
-   COLORBLIND MODE (NO GREEN)
-   ========================= */
-body.colorblind .life-fill.high {
-    background: #4b81ff; /* blue */
-}
-
-body.colorblind .life-fill.mid {
-    background: #ffcc00; /* yellow */
-}
-
-body.colorblind .life-fill.low {
-    background: #ff4444; /* red */
-}
-
-/* =========================
-   ONLINE STATUS
-   ========================= */
-.online {
-    font-weight: bold;
-}
-
-/* NORMAL = GREEN */
-body:not(.colorblind) .online {
-    color: #00ff88;
-}
-
-/* COLORBLIND = BLUE */
-body.colorblind .online {
-    color: #4b81ff;
-}
-
-/* =========================
-   ATTACKABLE ROW
-   ========================= */
-body:not(.colorblind) .attackable {
-    background: rgba(0, 255, 0, 0.08);
-}
-
-body.colorblind .attackable {
-    background: rgba(75, 129, 255, 0.14);
-    box-shadow: inset 4px 0 0 #4b81ff;
-}
-
-/* BUTTON */
 .btn {
     background: #ff4444;
     color: white;
     padding: 5px 10px;
     border-radius: 4px;
     text-decoration: none;
+    font-weight: bold;
     display: inline-block;
+}
+
+.btn:hover { background: #ff2222; }
+
+.online { color: #00ff88; font-weight: bold; }
+.idle { color: #cccccc; }
+
+body.colorblind-mode .online {
+    color: #ffd84d;
+    font-weight: 700;
+    background: rgba(255, 216, 77, 0.12);
+    border: 1px solid #ffd84d;
+    border-radius: 999px;
+    padding: 1px 8px;
+}
+
+body.high-contrast-mode .online {
+    color: #9efb9e;
 }
 
 #status {
@@ -152,23 +194,63 @@ body.colorblind .attackable {
 <h1 id="title">Faction War Targets</h1>
 <div id="status">Initializing...</div>
 
-<!-- COLORBLIND TOGGLE -->
-<div class="display-options">
+<div class="display-options" aria-label="Display options">
     <label class="toggle-option">
-        <input type="checkbox" id="colorBlindToggle">
-        Colorblind Mode (ON/OFF)
+        <input type="checkbox" id="colorBlindMode">
+        Color blind mode
+    </label>
+
+    <label class="toggle-option">
+        <input type="checkbox" id="highContrastMode">
+        High contrast
     </label>
 </div>
 
-<!-- INPUTS -->
-<form id="loginForm" class="controls">
+<div class="legend" aria-label="Legend">
+    <span class="legend-item"><span class="legend-swatch online"></span> Online</span>
+    <span class="legend-item"><span class="legend-swatch attackable"></span> Attackable target</span>
+    <span class="legend-item"><span class="legend-swatch colorblind"></span> Color blind mode uses a blue row marker</span>
+</div>
 
-    <input id="apiKey" placeholder="API Key">
-    <input id="factionId" placeholder="Faction ID">
+<!-- LOGIN FORM -->
+<form id="loginForm" autocomplete="on" class="controls">
+
+    <label>
+        API Key:
+        <input type="text" id="apiKey" name="apiKey"
+               placeholder="Enter Torn API Key"
+               autocomplete="username">
+    </label>
+
+    <label>
+        Faction ID:
+        <input type="text" id="factionId" name="factionId"
+               placeholder="Enter Faction ID"
+               autocomplete="off">
+    </label>
+
     <button type="submit">Load</button>
 
-    <input type="number" id="minLevel" value="0">
-    <input type="number" id="maxLevel" value="999">
+    <label>
+        Min Level:
+        <input type="number" id="minLevel" value="0">
+    </label>
+
+    <label>
+        Max Level:
+        <input type="number" id="maxLevel" value="999">
+    </label>
+
+    <label>
+        Sort:
+        <select id="sortDir">
+            <option value="asc" selected>Ascending</option>
+            <option value="desc">Descending</option>
+        </select>
+    </label>
+
+    <button type="button" onclick="toggleHittable()">🔴 Hittable NOW</button>
+    <button type="button" onclick="loadMembers()">Refresh</button>
 
 </form>
 
@@ -176,6 +258,7 @@ body.colorblind .attackable {
 <thead>
 <tr>
     <th>Name</th>
+    <th>Age</th>
     <th>Level</th>
     <th>Online</th>
     <th>Life</th>
@@ -183,103 +266,244 @@ body.colorblind .attackable {
     <th>Action</th>
 </tr>
 </thead>
+
 <tbody id="results"></tbody>
 </table>
 
 <script>
 
 let membersCache = [];
+let factionName = "";
+let hittableMode = false;
+let colorBlindMode = false;
+let highContrastMode = false;
 
 /* =========================
-   TOGGLE COLORBLIND MODE
+   LOGIN + AUTO LOGIN
    ========================= */
-document.getElementById("colorBlindToggle").addEventListener("change", (e) => {
-    document.body.classList.toggle("colorblind", e.target.checked);
+
+document.getElementById("loginForm").addEventListener("submit", function(e) {
+    e.preventDefault();
+    saveSettings();
+    loadMembers();
+});
+
+document.getElementById("colorBlindMode").addEventListener("change", function() {
+    saveSettings();
+    updateDisplayModes();
+    renderTable();
+});
+
+document.getElementById("highContrastMode").addEventListener("change", function() {
+    saveSettings();
+    updateDisplayModes();
     renderTable();
 });
 
 /* =========================
-   LOAD DATA
+   SAVE / LOAD
    ========================= */
-document.getElementById("loginForm").addEventListener("submit", async (e) => {
-    e.preventDefault();
-    await loadMembers();
-});
 
-function lifeClass(percent) {
-    if (percent < 30) return "low";
-    if (percent < 70) return "mid";
-    return "high";
+function saveSettings() {
+    localStorage.setItem("torn_apiKey", document.getElementById("apiKey").value);
+    localStorage.setItem("torn_factionId", document.getElementById("factionId").value);
+    localStorage.setItem("torn_colorBlindMode", document.getElementById("colorBlindMode").checked ? "1" : "0");
+    localStorage.setItem("torn_highContrastMode", document.getElementById("highContrastMode").checked ? "1" : "0");
+}
+
+function loadSettings() {
+    const apiKey = localStorage.getItem("torn_apiKey");
+    const factionId = localStorage.getItem("torn_factionId");
+    const savedColorBlindMode = localStorage.getItem("torn_colorBlindMode");
+    const savedHighContrastMode = localStorage.getItem("torn_highContrastMode");
+
+    if (apiKey) document.getElementById("apiKey").value = apiKey;
+    if (factionId) document.getElementById("factionId").value = factionId;
+    document.getElementById("colorBlindMode").checked = savedColorBlindMode === "1";
+    document.getElementById("highContrastMode").checked = savedHighContrastMode === "1";
+
+    updateDisplayModes();
+}
+
+function updateDisplayModes() {
+    colorBlindMode = document.getElementById("colorBlindMode").checked;
+    highContrastMode = document.getElementById("highContrastMode").checked;
+
+    document.body.classList.toggle("colorblind-mode", colorBlindMode);
+    document.body.classList.toggle("high-contrast-mode", highContrastMode);
 }
 
 /* =========================
-   FETCH FACTION
+   HELPERS
    ========================= */
+
+function getAPIKey() {
+    return document.getElementById("apiKey").value.trim();
+}
+
+function getFactionID() {
+    return document.getElementById("factionId").value.trim();
+}
+
+function lifePercent(cur, max) {
+    return Math.min(100, Math.round((cur / max) * 100));
+}
+
+function timeAgo(ts) {
+    const now = Math.floor(Date.now() / 1000);
+    const diff = now - ts;
+
+    if (diff < 300) return "Online";
+    if (diff < 3600) return `${Math.floor(diff / 60)}m ago`;
+    if (diff < 86400) return `${Math.floor(diff / 3600)}h ago`;
+    return `${Math.floor(diff / 86400)}d ago`;
+}
+
+/* =========================
+   FETCH USER DATA
+   ========================= */
+
+async function fetchUserStats(id, apiKey) {
+    try {
+        const res = await fetch(
+            `https://api.torn.com/user/${id}?selections=profile&key=${apiKey}`
+        );
+        const data = await res.json();
+
+        return {
+            age: data.age || null,
+            lifeCurrent: data.life?.current || 0,
+            lifeMax: data.life?.maximum || 1,
+            lastAction: data.last_action?.timestamp || 0,
+            statusState: data.status?.state || "Okay",
+            statusUntil: data.status?.until || 0
+        };
+
+    } catch {
+        return {
+            age: null,
+            lifeCurrent: 0,
+            lifeMax: 1,
+            lastAction: 0,
+            statusState: "Okay",
+            statusUntil: 0
+        };
+    }
+}
+
+/* =========================
+   LOAD FACTION
+   ========================= */
+
 async function loadMembers() {
 
-    const apiKey = document.getElementById("apiKey").value;
-    const factionId = document.getElementById("factionId").value;
+    const apiKey = getAPIKey();
+    const factionId = getFactionID();
 
     const status = document.getElementById("status");
 
-    status.textContent = "Loading...";
+    if (!apiKey || !factionId) {
+        status.textContent = "Enter API Key + Faction ID.";
+        return;
+    }
 
-    const res = await fetch(
-        `https://api.torn.com/faction/${factionId}?selections=basic&key=${apiKey}`
-    );
+    status.textContent = "Loading faction data...";
 
-    const data = await res.json();
-    const entries = Object.entries(data.members);
+    try {
+        const res = await fetch(
+            `https://api.torn.com/faction/${factionId}?selections=basic&key=${apiKey}`
+        );
 
-    membersCache = await Promise.all(entries.map(async ([id, m]) => {
+        const data = await res.json();
 
-        const u = await fetch(
-            `https://api.torn.com/user/${id}?selections=profile&key=${apiKey}`
-        ).then(r => r.json());
+        if (data.error) {
+            status.textContent = data.error.error;
+            return;
+        }
 
-        return {
-            id,
-            name: m.name,
-            level: m.level,
-            life: u.life?.current || 0,
-            max: u.life?.maximum || 1,
-            last: u.last_action?.timestamp || 0
-        };
-    }));
+        factionName = data.name;
+        const entries = Object.entries(data.members);
 
-    renderTable();
+        membersCache = await Promise.all(entries.map(async ([id, m]) => {
+
+            const stats = await fetchUserStats(id, apiKey);
+
+            const now = Math.floor(Date.now() / 1000);
+
+            return {
+                id,
+                name: m.name,
+                level: m.level || 0,
+                age: stats.age,
+                lifeCurrent: stats.lifeCurrent,
+                lifeMax: stats.lifeMax,
+                lastAction: stats.lastAction,
+                online: (now - stats.lastAction) <= 300,
+                statusState: stats.statusState,
+                statusUntil: stats.statusUntil,
+                attackable: m.status?.description === "Okay"
+            };
+        }));
+
+        renderTable();
+
+    } catch (err) {
+        status.textContent = "Failed to load.";
+        console.error(err);
+    }
 }
 
 /* =========================
    RENDER TABLE
    ========================= */
+
 function renderTable() {
 
     const tbody = document.getElementById("results");
+
+    const min = +document.getElementById("minLevel").value;
+    const max = +document.getElementById("maxLevel").value;
+    const sort = document.getElementById("sortDir").value;
+
+    let data = membersCache.filter(m =>
+        m.level >= min &&
+        m.level <= max &&
+        m.age !== null
+    );
+
+    data.sort((a,b)=> sort === "asc" ? a.level - b.level : b.level - a.level);
+
     tbody.innerHTML = "";
 
-    membersCache.forEach(m => {
+    data.forEach(m => {
 
-        const percent = Math.round((m.life / m.max) * 100);
-        const cls = lifeClass(percent);
+        if (hittableMode && !m.attackable) return;
 
-        const online = (Date.now()/1000 - m.last) < 300
+        const percent = lifePercent(m.lifeCurrent, m.lifeMax);
+        const onlineDisplay = m.online
             ? `<span class="online">Online</span>`
-            : "Offline";
+            : `<span class="idle">${timeAgo(m.lastAction)}</span>`;
+        const statusDisplay = colorBlindMode
+            ? `<strong>${m.attackable ? "Attackable" : "Not attackable"}</strong>`
+            : (m.statusState === "Okay" ? "Okay" : m.statusState);
 
         const row = document.createElement("tr");
 
+        if (m.attackable) row.classList.add("attackable");
+        if (highContrastMode) row.classList.add("high-contrast-row");
+
         row.innerHTML = `
             <td>${m.name}</td>
+            <td>${m.age}</td>
             <td>${m.level}</td>
-            <td>${online}</td>
+            <td>${onlineDisplay}</td>
             <td>
-                ${m.life}/${m.max}
+                ${m.lifeCurrent}/${m.lifeMax}
                 <div class="life-bar">
-                    <div class="life-fill ${cls}" style="width:${percent}%"></div>
+                    <div class="life-fill" style="width:${percent}%"></div>
                 </div>
             </td>
-            <td>OK</td>
+            <td>${statusDisplay}</td>
             <td>
                 <a class="btn" target="_blank"
                    href="https://www.torn.com/profiles.php?XID=${m.id}">
@@ -291,9 +515,39 @@ function renderTable() {
         tbody.appendChild(row);
     });
 
+    document.getElementById("title").textContent =
+        `Faction War Targets - ${factionName}`;
+
     document.getElementById("status").textContent =
-        `Loaded ${membersCache.length} members`;
+        `Loaded ${data.length} members`;
 }
+
+/* =========================
+   TOGGLE MODE
+   ========================= */
+
+function toggleHittable() {
+    hittableMode = !hittableMode;
+    renderTable();
+}
+
+/* =========================
+   AUTO LOGIN ON OPEN
+   ========================= */
+
+window.addEventListener("load", () => {
+    loadSettings();
+
+    const apiKey = getAPIKey();
+    const factionId = getFactionID();
+
+    if (apiKey && factionId) {
+        loadMembers(); // 🔥 auto-login
+    } else {
+        document.getElementById("status").textContent =
+            "Enter API Key + Faction ID to begin.";
+    }
+});
 
 </script>
 
