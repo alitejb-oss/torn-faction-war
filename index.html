@@ -195,6 +195,7 @@ let membersCache = [];
 let factionName = "";
 let hittableMode = false;
 let colorblindMode = false;
+let countdownIntervals = {};
 
 /* =========================
    LOGIN + AUTO LOGIN
@@ -259,13 +260,11 @@ function timeAgo(ts) {
 function formatHospitalTime(seconds) {
     if (!seconds || seconds <= 0) return "Released";
     
-    const days = Math.floor(seconds / 86400);
-    const hours = Math.floor((seconds % 86400) / 3600);
+    const hours = Math.floor(seconds / 3600);
     const minutes = Math.floor((seconds % 3600) / 60);
     const secs = seconds % 60;
     
     let result = [];
-    if (days > 0) result.push(`${days}d`);
     if (hours > 0) result.push(`${hours}h`);
     if (minutes > 0) result.push(`${minutes}m`);
     if (secs > 0) result.push(`${secs}s`);
@@ -322,6 +321,10 @@ async function loadMembers() {
     }
 
     status.textContent = "Loading faction data...";
+
+    // Clear all existing countdown intervals
+    Object.values(countdownIntervals).forEach(interval => clearInterval(interval));
+    countdownIntervals = {};
 
     try {
         const res = await fetch(
@@ -400,6 +403,18 @@ function renderTable() {
 
         if (m.attackable) row.classList.add("attackable");
 
+        const statusCell = document.createElement("td");
+        statusCell.id = `status-${m.id}`;
+
+        if (m.statusState === "Okay") {
+            statusCell.textContent = "Okay";
+        } else {
+            statusCell.textContent = `${m.statusState} (${hospitalTime})`;
+            
+            // Start countdown timer for this member
+            startCountdown(m.id, m.statusUntil);
+        }
+
         row.innerHTML = `
             <td>${m.name}</td>
             <td>${m.age}</td>
@@ -411,7 +426,11 @@ function renderTable() {
                     <div class="life-fill" style="width:${percent}%"></div>
                 </div>
             </td>
-            <td>${m.statusState === "Okay" ? "Okay" : m.statusState} ${m.statusState !== "Okay" ? `(${hospitalTime})` : ""}</td>
+        `;
+
+        row.appendChild(statusCell);
+
+        row.innerHTML += `
             <td>
                 <a class="btn" target="_blank"
                    href="https://www.torn.com/profiles.php?XID=${m.id}">
@@ -428,6 +447,47 @@ function renderTable() {
 
     document.getElementById("status").textContent =
         `Loaded ${data.length} members`;
+}
+
+/* =========================
+   COUNTDOWN TIMER
+   ========================= */
+
+function startCountdown(memberId, statusUntil) {
+    // Clear any existing countdown for this member
+    if (countdownIntervals[memberId]) {
+        clearInterval(countdownIntervals[memberId]);
+    }
+
+    const updateCountdown = () => {
+        const now = Math.floor(Date.now() / 1000);
+        const remaining = statusUntil - now;
+
+        const statusCell = document.getElementById(`status-${memberId}`);
+        if (!statusCell) return; // Cell no longer exists, stop countdown
+
+        if (remaining <= 0) {
+            statusCell.textContent = "Okay";
+            clearInterval(countdownIntervals[memberId]);
+            delete countdownIntervals[memberId];
+        } else {
+            const hours = Math.floor(remaining / 3600);
+            const minutes = Math.floor((remaining % 3600) / 60);
+            const secs = remaining % 60;
+
+            let timeStr = [];
+            if (hours > 0) timeStr.push(`${hours}h`);
+            if (minutes > 0) timeStr.push(`${minutes}m`);
+            if (secs > 0) timeStr.push(`${secs}s`);
+
+            const member = membersCache.find(m => m.id == memberId);
+            const status = member ? member.statusState : "Hospital";
+            statusCell.textContent = `${status} (${timeStr.join(" ")})`;
+        }
+    };
+
+    updateCountdown();
+    countdownIntervals[memberId] = setInterval(updateCountdown, 1000);
 }
 
 /* =========================
@@ -472,6 +532,11 @@ window.addEventListener("load", () => {
         document.getElementById("status").textContent =
             "Enter API Key + Faction ID to begin.";
     }
+});
+
+// Cleanup on page unload
+window.addEventListener("beforeunload", () => {
+    Object.values(countdownIntervals).forEach(interval => clearInterval(interval));
 });
 
 </script>
