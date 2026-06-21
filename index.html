@@ -1,234 +1,405 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Random Joke Generator</title>
-    <style>
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-        }
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Torn Faction War Targets</title>
 
-        body {
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            min-height: 100vh;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            padding: 20px;
-        }
+<style>
+body {
+    font-family: Arial, sans-serif;
+    background: #1b1b1b;
+    color: white;
+    margin: 20px;
+}
 
-        .container {
-            background: white;
-            border-radius: 20px;
-            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
-            padding: 40px;
-            max-width: 600px;
-            width: 100%;
-            text-align: center;
-        }
+h1 { color: #00cc66; }
 
-        h1 {
-            color: #333;
-            margin-bottom: 30px;
-            font-size: 2.5em;
-        }
+.controls {
+    margin: 10px 0;
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px;
+    align-items: center;
+}
 
-        .joke-box {
-            background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
-            border-radius: 15px;
-            padding: 30px;
-            margin-bottom: 30px;
-            min-height: 120px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-        }
+label { font-size: 13px; }
 
-        .joke-text {
-            font-size: 1.3em;
-            color: #333;
-            font-weight: 500;
-            line-height: 1.6;
-        }
+input, select, button {
+    padding: 6px;
+    border-radius: 4px;
+    border: none;
+}
 
-        .loading {
-            color: #667eea;
-            font-style: italic;
-        }
+button { cursor: pointer; }
 
-        button {
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            color: white;
-            border: none;
-            padding: 15px 40px;
-            font-size: 1.1em;
-            border-radius: 50px;
-            cursor: pointer;
-            transition: transform 0.2s, box-shadow 0.2s;
-            font-weight: 600;
-            margin: 10px;
-        }
+table {
+    width: 100%;
+    border-collapse: collapse;
+    margin-top: 15px;
+}
 
-        button:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 10px 20px rgba(102, 126, 234, 0.4);
-        }
+th, td {
+    border: 1px solid #444;
+    padding: 8px;
+    text-align: left;
+}
 
-        button:active {
-            transform: translateY(0);
-        }
+th { background: #2d2d2d; }
 
-        .button-group {
-            display: flex;
-            justify-content: center;
-            flex-wrap: wrap;
-            gap: 10px;
-        }
+tr:nth-child(even) { background: #252525; }
 
-        .joke-counter {
-            color: #666;
-            font-size: 0.9em;
-            margin-top: 20px;
-        }
+.attackable {
+    background: rgba(0, 255, 0, 0.08);
+}
 
-        .error {
-            color: #e74c3c;
-            padding: 20px;
-            background: #fadbd8;
-            border-radius: 10px;
-            margin-bottom: 20px;
-        }
+.top-level {
+    box-shadow: inset 0 0 10px rgba(255, 215, 0, 0.4);
+    border-left: 3px solid gold;
+}
 
-        @media (max-width: 600px) {
-            .container {
-                padding: 20px;
-            }
+.life-bar {
+    width: 100%;
+    height: 10px;
+    background: #333;
+    border-radius: 5px;
+    overflow: hidden;
+}
 
-            h1 {
-                font-size: 1.8em;
-            }
+.life-fill {
+    height: 100%;
+    background: linear-gradient(90deg, #00ff66, #ffcc00, #ff4444);
+    transition: width 0.3s ease;
+}
 
-            .joke-text {
-                font-size: 1.1em;
-            }
+.btn {
+    background: #ff4444;
+    color: white;
+    padding: 5px 10px;
+    border-radius: 4px;
+    text-decoration: none;
+    font-weight: bold;
+    display: inline-block;
+}
 
-            button {
-                padding: 12px 30px;
-                font-size: 1em;
-            }
-        }
-    </style>
+.btn:hover { background: #ff2222; }
+
+.online { color: #00ff88; font-weight: bold; }
+.idle { color: #cccccc; }
+
+#status {
+    margin-top: 10px;
+    color: #cccccc;
+}
+</style>
 </head>
+
 <body>
-    <div class="container">
-        <h1>😂 Joke Generator</h1>
-        
-        <div id="errorMessage" class="error" style="display: none;"></div>
-        
-        <div class="joke-box">
-            <div class="joke-text" id="jokeText">Click "Get Joke" to start laughing!</div>
-        </div>
 
-        <div class="button-group">
-            <button onclick="getRandomJoke()">Get Joke</button>
-            <button onclick="getDadJoke()">Dad Joke</button>
-            <button onclick="copyJoke()">Copy Joke</button>
-        </div>
+<h1 id="title">Faction War Targets</h1>
+<div id="status">Initializing...</div>
 
-        <div class="joke-counter">
-            <p>Jokes loaded: <span id="jokeCount">0</span></p>
-        </div>
-    </div>
+<!-- LOGIN FORM -->
+<form id="loginForm" autocomplete="on" class="controls">
 
-    <script>
-        let jokeCount = 0;
-        let currentJoke = '';
+    <label>
+        API Key:
+        <input type="text" id="apiKey" name="apiKey"
+               placeholder="Enter Torn API Key"
+               autocomplete="username">
+    </label>
 
-        // Fetch random joke from Official Joke API
-        async function getRandomJoke() {
-            const jokeElement = document.getElementById('jokeText');
-            const errorElement = document.getElementById('errorMessage');
-            
-            jokeElement.classList.add('loading');
-            jokeElement.textContent = 'Loading joke...';
-            errorElement.style.display = 'none';
+    <label>
+        Faction ID:
+        <input type="text" id="factionId" name="factionId"
+               placeholder="Enter Faction ID"
+               autocomplete="off">
+    </label>
 
-            try {
-                const response = await fetch('https://official-joke-api.appspot.com/random_joke');
-                
-                if (!response.ok) {
-                    throw new Error('Failed to fetch joke');
-                }
+    <button type="submit">Load</button>
 
-                const data = await response.json();
-                currentJoke = `${data.setup}\n\n${data.punchline}`;
-                jokeElement.textContent = currentJoke;
-                jokeCount++;
-                document.getElementById('jokeCount').textContent = jokeCount;
-            } catch (error) {
-                jokeElement.textContent = 'Oops! Could not load joke. Try again!';
-                errorElement.textContent = `Error: ${error.message}`;
-                errorElement.style.display = 'block';
-                console.error('Error:', error);
-            } finally {
-                jokeElement.classList.remove('loading');
-            }
+    <label>
+        Min Level:
+        <input type="number" id="minLevel" value="0">
+    </label>
+
+    <label>
+        Max Level:
+        <input type="number" id="maxLevel" value="999">
+    </label>
+
+    <label>
+        Sort:
+        <select id="sortDir">
+            <option value="asc" selected>Ascending</option>
+            <option value="desc">Descending</option>
+        </select>
+    </label>
+
+    <button type="button" onclick="toggleHittable()">🔴 Hittable NOW</button>
+    <button type="button" onclick="loadMembers()">Refresh</button>
+
+</form>
+
+<table>
+<thead>
+<tr>
+    <th>Name</th>
+    <th>Age</th>
+    <th>Level</th>
+    <th>Online</th>
+    <th>Life</th>
+    <th>Status</th>
+    <th>Action</th>
+</tr>
+</thead>
+
+<tbody id="results"></tbody>
+</table>
+
+<script>
+
+let membersCache = [];
+let factionName = "";
+let hittableMode = false;
+
+/* =========================
+   LOGIN + AUTO LOGIN
+   ========================= */
+
+document.getElementById("loginForm").addEventListener("submit", function(e) {
+    e.preventDefault();
+    saveSettings();
+    loadMembers();
+});
+
+/* =========================
+   SAVE / LOAD
+   ========================= */
+
+function saveSettings() {
+    localStorage.setItem("torn_apiKey", document.getElementById("apiKey").value);
+    localStorage.setItem("torn_factionId", document.getElementById("factionId").value);
+}
+
+function loadSettings() {
+    const apiKey = localStorage.getItem("torn_apiKey");
+    const factionId = localStorage.getItem("torn_factionId");
+
+    if (apiKey) document.getElementById("apiKey").value = apiKey;
+    if (factionId) document.getElementById("factionId").value = factionId;
+}
+
+/* =========================
+   HELPERS
+   ========================= */
+
+function getAPIKey() {
+    return document.getElementById("apiKey").value.trim();
+}
+
+function getFactionID() {
+    return document.getElementById("factionId").value.trim();
+}
+
+function lifePercent(cur, max) {
+    return Math.min(100, Math.round((cur / max) * 100));
+}
+
+function timeAgo(ts) {
+    const now = Math.floor(Date.now() / 1000);
+    const diff = now - ts;
+
+    if (diff < 300) return "Online";
+    if (diff < 3600) return `${Math.floor(diff / 60)}m ago`;
+    if (diff < 86400) return `${Math.floor(diff / 3600)}h ago`;
+    return `${Math.floor(diff / 86400)}d ago`;
+}
+
+/* =========================
+   FETCH USER DATA
+   ========================= */
+
+async function fetchUserStats(id, apiKey) {
+    try {
+        const res = await fetch(
+            `https://api.torn.com/user/${id}?selections=profile&key=${apiKey}`
+        );
+        const data = await res.json();
+
+        return {
+            age: data.age || null,
+            lifeCurrent: data.life?.current || 0,
+            lifeMax: data.life?.maximum || 1,
+            lastAction: data.last_action?.timestamp || 0,
+            statusState: data.status?.state || "Okay",
+            statusUntil: data.status?.until || 0
+        };
+
+    } catch {
+        return {
+            age: null,
+            lifeCurrent: 0,
+            lifeMax: 1,
+            lastAction: 0,
+            statusState: "Okay",
+            statusUntil: 0
+        };
+    }
+}
+
+/* =========================
+   LOAD FACTION
+   ========================= */
+
+async function loadMembers() {
+
+    const apiKey = getAPIKey();
+    const factionId = getFactionID();
+
+    const status = document.getElementById("status");
+
+    if (!apiKey || !factionId) {
+        status.textContent = "Enter API Key + Faction ID.";
+        return;
+    }
+
+    status.textContent = "Loading faction data...";
+
+    try {
+        const res = await fetch(
+            `https://api.torn.com/faction/${factionId}?selections=basic&key=${apiKey}`
+        );
+
+        const data = await res.json();
+
+        if (data.error) {
+            status.textContent = data.error.error;
+            return;
         }
 
-        // Fetch dad joke from Joke API
-        async function getDadJoke() {
-            const jokeElement = document.getElementById('jokeText');
-            const errorElement = document.getElementById('errorMessage');
-            
-            jokeElement.classList.add('loading');
-            jokeElement.textContent = 'Loading dad joke...';
-            errorElement.style.display = 'none';
+        factionName = data.name;
+        const entries = Object.entries(data.members);
 
-            try {
-                const response = await fetch('https://icanhazdadjoke.com/random?type=json');
-                
-                if (!response.ok) {
-                    throw new Error('Failed to fetch dad joke');
-                }
+        membersCache = await Promise.all(entries.map(async ([id, m]) => {
 
-                const data = await response.json();
-                currentJoke = data.joke;
-                jokeElement.textContent = currentJoke;
-                jokeCount++;
-                document.getElementById('jokeCount').textContent = jokeCount;
-            } catch (error) {
-                jokeElement.textContent = 'Oops! Could not load joke. Try again!';
-                errorElement.textContent = `Error: ${error.message}`;
-                errorElement.style.display = 'block';
-                console.error('Error:', error);
-            } finally {
-                jokeElement.classList.remove('loading');
-            }
-        }
+            const stats = await fetchUserStats(id, apiKey);
 
-        // Copy joke to clipboard
-        function copyJoke() {
-            if (!currentJoke) {
-                alert('Please load a joke first!');
-                return;
-            }
+            const now = Math.floor(Date.now() / 1000);
 
-            navigator.clipboard.writeText(currentJoke).then(() => {
-                alert('Joke copied to clipboard! 📋');
-            }).catch(err => {
-                console.error('Failed to copy:', err);
-                alert('Failed to copy joke');
-            });
-        }
+            return {
+                id,
+                name: m.name,
+                level: m.level || 0,
+                age: stats.age,
+                lifeCurrent: stats.lifeCurrent,
+                lifeMax: stats.lifeMax,
+                lastAction: stats.lastAction,
+                online: (now - stats.lastAction) <= 300,
+                statusState: stats.statusState,
+                statusUntil: stats.statusUntil,
+                attackable: m.status?.description === "Okay"
+            };
+        }));
 
-        // Load a joke on page load
-        window.addEventListener('load', () => {
-            getRandomJoke();
-        });
-    </script>
+        renderTable();
+
+    } catch (err) {
+        status.textContent = "Failed to load.";
+        console.error(err);
+    }
+}
+
+/* =========================
+   RENDER TABLE
+   ========================= */
+
+function renderTable() {
+
+    const tbody = document.getElementById("results");
+
+    const min = +document.getElementById("minLevel").value;
+    const max = +document.getElementById("maxLevel").value;
+    const sort = document.getElementById("sortDir").value;
+
+    let data = membersCache.filter(m =>
+        m.level >= min &&
+        m.level <= max &&
+        m.age !== null
+    );
+
+    data.sort((a,b)=> sort === "asc" ? a.level - b.level : b.level - a.level);
+
+    tbody.innerHTML = "";
+
+    data.forEach(m => {
+
+        if (hittableMode && !m.attackable) return;
+
+        const percent = lifePercent(m.lifeCurrent, m.lifeMax);
+
+        const row = document.createElement("tr");
+
+        if (m.attackable) row.classList.add("attackable");
+
+        row.innerHTML = `
+            <td>${m.name}</td>
+            <td>${m.age}</td>
+            <td>${m.level}</td>
+            <td>${timeAgo(m.lastAction)}</td>
+            <td>
+                ${m.lifeCurrent}/${m.lifeMax}
+                <div class="life-bar">
+                    <div class="life-fill" style="width:${percent}%"></div>
+                </div>
+            </td>
+            <td>${m.statusState === "Okay" ? "Okay" : m.statusState}</td>
+            <td>
+                <a class="btn" target="_blank"
+                   href="https://www.torn.com/profiles.php?XID=${m.id}">
+                   Attack
+                </a>
+            </td>
+        `;
+
+        tbody.appendChild(row);
+    });
+
+    document.getElementById("title").textContent =
+        `Faction War Targets - ${factionName}`;
+
+    document.getElementById("status").textContent =
+        `Loaded ${data.length} members`;
+}
+
+/* =========================
+   TOGGLE MODE
+   ========================= */
+
+function toggleHittable() {
+    hittableMode = !hittableMode;
+    renderTable();
+}
+
+/* =========================
+   AUTO LOGIN ON OPEN
+   ========================= */
+
+window.addEventListener("load", () => {
+    loadSettings();
+
+    const apiKey = getAPIKey();
+    const factionId = getFactionID();
+
+    if (apiKey && factionId) {
+        loadMembers(); // 🔥 auto-login
+    } else {
+        document.getElementById("status").textContent =
+            "Enter API Key + Faction ID to begin.";
+    }
+});
+
+</script>
+
 </body>
 </html>
