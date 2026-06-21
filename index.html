@@ -72,6 +72,15 @@ tr:nth-child(even) { background: #252525; }
     transition: width 0.3s ease;
 }
 
+/* Color blind mode - blue, orange, red palette */
+body.colorblind .life-fill {
+    background: linear-gradient(90deg, #0173B2, #DE8F05, #CC78BC);
+}
+
+body.colorblind .attackable {
+    background: rgba(1, 115, 178, 0.08);
+}
+
 .btn {
     background: #ff4444;
     color: white;
@@ -90,6 +99,28 @@ tr:nth-child(even) { background: #252525; }
 #status {
     margin-top: 10px;
     color: #cccccc;
+}
+
+.toggle-btn {
+    background: #444;
+    color: white;
+    padding: 6px 10px;
+    border-radius: 4px;
+    border: none;
+    cursor: pointer;
+    font-size: 13px;
+}
+
+.toggle-btn.active {
+    background: #0173B2;
+}
+
+.toggle-btn:hover {
+    background: #555;
+}
+
+.toggle-btn.active:hover {
+    background: #0156A0;
 }
 </style>
 </head>
@@ -137,6 +168,7 @@ tr:nth-child(even) { background: #252525; }
     </label>
 
     <button type="button" onclick="toggleHittable()">🔴 Hittable NOW</button>
+    <button type="button" onclick="toggleColorBlind()" class="toggle-btn" id="colorblindBtn">🎨 Color Blind Mode</button>
     <button type="button" onclick="loadMembers()">Refresh</button>
 
 </form>
@@ -162,6 +194,7 @@ tr:nth-child(even) { background: #252525; }
 let membersCache = [];
 let factionName = "";
 let hittableMode = false;
+let colorblindMode = false;
 
 /* =========================
    LOGIN + AUTO LOGIN
@@ -180,14 +213,21 @@ document.getElementById("loginForm").addEventListener("submit", function(e) {
 function saveSettings() {
     localStorage.setItem("torn_apiKey", document.getElementById("apiKey").value);
     localStorage.setItem("torn_factionId", document.getElementById("factionId").value);
+    localStorage.setItem("torn_colorblindMode", colorblindMode);
 }
 
 function loadSettings() {
     const apiKey = localStorage.getItem("torn_apiKey");
     const factionId = localStorage.getItem("torn_factionId");
+    const colorblind = localStorage.getItem("torn_colorblindMode") === "true";
 
     if (apiKey) document.getElementById("apiKey").value = apiKey;
     if (factionId) document.getElementById("factionId").value = factionId;
+    
+    if (colorblind) {
+        colorblindMode = true;
+        applyColorblindMode();
+    }
 }
 
 /* =========================
@@ -214,6 +254,23 @@ function timeAgo(ts) {
     if (diff < 3600) return `${Math.floor(diff / 60)}m ago`;
     if (diff < 86400) return `${Math.floor(diff / 3600)}h ago`;
     return `${Math.floor(diff / 86400)}d ago`;
+}
+
+function formatHospitalTime(seconds) {
+    if (!seconds || seconds <= 0) return "Released";
+    
+    const days = Math.floor(seconds / 86400);
+    const hours = Math.floor((seconds % 86400) / 3600);
+    const minutes = Math.floor((seconds % 3600) / 60);
+    const secs = seconds % 60;
+    
+    let result = [];
+    if (days > 0) result.push(`${days}d`);
+    if (hours > 0) result.push(`${hours}h`);
+    if (minutes > 0) result.push(`${minutes}m`);
+    if (secs > 0) result.push(`${secs}s`);
+    
+    return result.length > 0 ? result.join(" ") : "Released";
 }
 
 /* =========================
@@ -337,6 +394,7 @@ function renderTable() {
         if (hittableMode && !m.attackable) return;
 
         const percent = lifePercent(m.lifeCurrent, m.lifeMax);
+        const hospitalTime = formatHospitalTime(m.statusUntil);
 
         const row = document.createElement("tr");
 
@@ -353,7 +411,7 @@ function renderTable() {
                     <div class="life-fill" style="width:${percent}%"></div>
                 </div>
             </td>
-            <td>${m.statusState === "Okay" ? "Okay" : m.statusState}</td>
+            <td>${m.statusState === "Okay" ? "Okay" : m.statusState} ${m.statusState !== "Okay" ? `(${hospitalTime})` : ""}</td>
             <td>
                 <a class="btn" target="_blank"
                    href="https://www.torn.com/profiles.php?XID=${m.id}">
@@ -379,6 +437,23 @@ function renderTable() {
 function toggleHittable() {
     hittableMode = !hittableMode;
     renderTable();
+}
+
+function toggleColorBlind() {
+    colorblindMode = !colorblindMode;
+    applyColorblindMode();
+    saveSettings();
+}
+
+function applyColorblindMode() {
+    const btn = document.getElementById("colorblindBtn");
+    if (colorblindMode) {
+        document.body.classList.add("colorblind");
+        btn.classList.add("active");
+    } else {
+        document.body.classList.remove("colorblind");
+        btn.classList.remove("active");
+    }
 }
 
 /* =========================
