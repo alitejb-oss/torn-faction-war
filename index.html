@@ -23,6 +23,69 @@ h1 { color: #00cc66; }
     align-items: center;
 }
 
+.display-options {
+    margin: 10px 0 0;
+    display: flex;
+    flex-wrap: wrap;
+    gap: 12px;
+    align-items: center;
+}
+
+.toggle-option {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    font-size: 13px;
+    color: #dddddd;
+}
+
+.toggle-option input {
+    accent-color: #00cc66;
+}
+
+.legend {
+    margin: 6px 0 14px;
+    padding: 10px 12px;
+    border: 1px solid #444;
+    border-radius: 6px;
+    background: #222222;
+    display: flex;
+    flex-wrap: wrap;
+    gap: 12px 18px;
+    align-items: center;
+    font-size: 12px;
+    color: #dddddd;
+}
+
+.legend-item {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+}
+
+.legend-swatch {
+    width: 12px;
+    height: 12px;
+    border-radius: 999px;
+    border: 1px solid #666;
+    flex: 0 0 12px;
+}
+
+.legend-swatch.online {
+    background: #00ff88;
+    border-color: #00ff88;
+}
+
+.legend-swatch.attackable {
+    background: rgba(0, 255, 0, 0.14);
+    border-color: #00ff66;
+}
+
+.legend-swatch.colorblind {
+    background: #4b81ff;
+    border-color: #4b81ff;
+}
+
 label { font-size: 13px; }
 
 input, select, button {
@@ -51,6 +114,25 @@ tr:nth-child(even) { background: #252525; }
 
 .attackable {
     background: rgba(0, 255, 0, 0.08);
+}
+
+body.colorblind-mode .attackable {
+    background: rgba(75, 129, 255, 0.14);
+    box-shadow: inset 4px 0 0 #4b81ff;
+}
+
+body.high-contrast-mode {
+    background: #111111;
+    color: #ffffff;
+}
+
+body.high-contrast-mode th,
+body.high-contrast-mode td {
+    border-color: #666666;
+}
+
+body.high-contrast-mode .attackable {
+    background: rgba(255, 255, 255, 0.08);
 }
 
 .top-level {
@@ -87,6 +169,19 @@ tr:nth-child(even) { background: #252525; }
 .online { color: #00ff88; font-weight: bold; }
 .idle { color: #cccccc; }
 
+body.colorblind-mode .online {
+    color: #ffd84d;
+    font-weight: 700;
+    background: rgba(255, 216, 77, 0.12);
+    border: 1px solid #ffd84d;
+    border-radius: 999px;
+    padding: 1px 8px;
+}
+
+body.high-contrast-mode .online {
+    color: #9efb9e;
+}
+
 #status {
     margin-top: 10px;
     color: #cccccc;
@@ -98,6 +193,24 @@ tr:nth-child(even) { background: #252525; }
 
 <h1 id="title">Faction War Targets</h1>
 <div id="status">Initializing...</div>
+
+<div class="display-options" aria-label="Display options">
+    <label class="toggle-option">
+        <input type="checkbox" id="colorBlindMode">
+        Color blind mode
+    </label>
+
+    <label class="toggle-option">
+        <input type="checkbox" id="highContrastMode">
+        High contrast
+    </label>
+</div>
+
+<div class="legend" aria-label="Legend">
+    <span class="legend-item"><span class="legend-swatch online"></span> Online</span>
+    <span class="legend-item"><span class="legend-swatch attackable"></span> Attackable target</span>
+    <span class="legend-item"><span class="legend-swatch colorblind"></span> Color blind mode uses a blue row marker</span>
+</div>
 
 <!-- LOGIN FORM -->
 <form id="loginForm" autocomplete="on" class="controls">
@@ -162,6 +275,8 @@ tr:nth-child(even) { background: #252525; }
 let membersCache = [];
 let factionName = "";
 let hittableMode = false;
+let colorBlindMode = false;
+let highContrastMode = false;
 
 /* =========================
    LOGIN + AUTO LOGIN
@@ -173,6 +288,18 @@ document.getElementById("loginForm").addEventListener("submit", function(e) {
     loadMembers();
 });
 
+document.getElementById("colorBlindMode").addEventListener("change", function() {
+    saveSettings();
+    updateDisplayModes();
+    renderTable();
+});
+
+document.getElementById("highContrastMode").addEventListener("change", function() {
+    saveSettings();
+    updateDisplayModes();
+    renderTable();
+});
+
 /* =========================
    SAVE / LOAD
    ========================= */
@@ -180,14 +307,30 @@ document.getElementById("loginForm").addEventListener("submit", function(e) {
 function saveSettings() {
     localStorage.setItem("torn_apiKey", document.getElementById("apiKey").value);
     localStorage.setItem("torn_factionId", document.getElementById("factionId").value);
+    localStorage.setItem("torn_colorBlindMode", document.getElementById("colorBlindMode").checked ? "1" : "0");
+    localStorage.setItem("torn_highContrastMode", document.getElementById("highContrastMode").checked ? "1" : "0");
 }
 
 function loadSettings() {
     const apiKey = localStorage.getItem("torn_apiKey");
     const factionId = localStorage.getItem("torn_factionId");
+    const savedColorBlindMode = localStorage.getItem("torn_colorBlindMode");
+    const savedHighContrastMode = localStorage.getItem("torn_highContrastMode");
 
     if (apiKey) document.getElementById("apiKey").value = apiKey;
     if (factionId) document.getElementById("factionId").value = factionId;
+    document.getElementById("colorBlindMode").checked = savedColorBlindMode === "1";
+    document.getElementById("highContrastMode").checked = savedHighContrastMode === "1";
+
+    updateDisplayModes();
+}
+
+function updateDisplayModes() {
+    colorBlindMode = document.getElementById("colorBlindMode").checked;
+    highContrastMode = document.getElementById("highContrastMode").checked;
+
+    document.body.classList.toggle("colorblind-mode", colorBlindMode);
+    document.body.classList.toggle("high-contrast-mode", highContrastMode);
 }
 
 /* =========================
@@ -337,23 +480,30 @@ function renderTable() {
         if (hittableMode && !m.attackable) return;
 
         const percent = lifePercent(m.lifeCurrent, m.lifeMax);
+        const onlineDisplay = m.online
+            ? `<span class="online">Online</span>`
+            : `<span class="idle">${timeAgo(m.lastAction)}</span>`;
+        const statusDisplay = colorBlindMode
+            ? `<strong>${m.attackable ? "Attackable" : "Not attackable"}</strong>`
+            : (m.statusState === "Okay" ? "Okay" : m.statusState);
 
         const row = document.createElement("tr");
 
         if (m.attackable) row.classList.add("attackable");
+        if (highContrastMode) row.classList.add("high-contrast-row");
 
         row.innerHTML = `
             <td>${m.name}</td>
             <td>${m.age}</td>
             <td>${m.level}</td>
-            <td>${timeAgo(m.lastAction)}</td>
+            <td>${onlineDisplay}</td>
             <td>
                 ${m.lifeCurrent}/${m.lifeMax}
                 <div class="life-bar">
                     <div class="life-fill" style="width:${percent}%"></div>
                 </div>
             </td>
-            <td>${m.statusState === "Okay" ? "Okay" : m.statusState}</td>
+            <td>${statusDisplay}</td>
             <td>
                 <a class="btn" target="_blank"
                    href="https://www.torn.com/profiles.php?XID=${m.id}">
