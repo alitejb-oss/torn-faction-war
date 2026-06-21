@@ -13,88 +13,71 @@ body {
     margin: 20px;
 }
 
-h1 { color: #4b81ff; }
+h1 { color: #00cc66; } /* NORMAL MODE GREEN */
 
 .controls {
     margin: 10px 0;
     display: flex;
     flex-wrap: wrap;
     gap: 10px;
-    align-items: center;
 }
 
 .display-options {
-    margin: 10px 0 0;
+    margin: 10px 0;
     display: flex;
-    flex-wrap: wrap;
-    gap: 12px;
-    align-items: center;
+    gap: 15px;
 }
 
 .toggle-option {
-    display: inline-flex;
-    align-items: center;
-    gap: 6px;
     font-size: 13px;
-    color: #dddddd;
 }
 
-.toggle-option input {
-    accent-color: #4b81ff;
+/* =========================
+   NORMAL MODE (GREEN SYSTEM)
+   ========================= */
+
+body:not(.colorblind) .online {
+    color: #00ff88;
+    font-weight: bold;
 }
 
-.legend {
-    margin: 6px 0 14px;
-    padding: 10px 12px;
-    border: 1px solid #444;
-    border-radius: 6px;
-    background: #222222;
-    display: flex;
-    flex-wrap: wrap;
-    gap: 12px 18px;
-    align-items: center;
-    font-size: 12px;
-    color: #dddddd;
+body:not(.colorblind) .life-fill {
+    background: linear-gradient(90deg, #00ff66, #ffcc00, #ff4444);
 }
 
-.legend-item {
-    display: inline-flex;
-    align-items: center;
-    gap: 6px;
+body:not(.colorblind) .attackable {
+    background: rgba(0, 255, 0, 0.08);
 }
 
-.legend-swatch {
-    width: 12px;
-    height: 12px;
-    border-radius: 999px;
-    border: 1px solid #666;
+/* =========================
+   COLORBLIND MODE (NO GREEN)
+   ========================= */
+
+body.colorblind h1 { color: #4b81ff; }
+
+body.colorblind .online {
+    color: #4b81ff;
+    font-weight: bold;
 }
 
-.legend-swatch.online {
-    background: #4b81ff;
-    border-color: #4b81ff;
+body.colorblind .attackable {
+    background: rgba(75, 129, 255, 0.14);
+    box-shadow: inset 4px 0 0 #4b81ff;
 }
 
-.legend-swatch.attackable {
-    background: rgba(255, 140, 0, 0.18);
-    border-color: #ff9800;
+body.colorblind .life-fill.low {
+    background: #ff4444;
 }
 
-.legend-swatch.colorblind {
+body.colorblind .life-fill.mid {
     background: #ffcc00;
-    border-color: #ffcc00;
 }
 
-label { font-size: 13px; }
-
-input, select, button {
-    padding: 6px;
-    border-radius: 4px;
-    border: none;
+body.colorblind .life-fill.high {
+    background: #4b81ff;
 }
 
-button { cursor: pointer; }
-
+/* TABLE */
 table {
     width: 100%;
     border-collapse: collapse;
@@ -104,39 +87,13 @@ table {
 th, td {
     border: 1px solid #444;
     padding: 8px;
-    text-align: left;
 }
 
 th { background: #2d2d2d; }
 
 tr:nth-child(even) { background: #252525; }
 
-/* ATTACKABLE */
-.attackable {
-    background: rgba(255, 140, 0, 0.10);
-}
-
-body.colorblind-mode .attackable {
-    background: rgba(75, 129, 255, 0.14);
-    box-shadow: inset 4px 0 0 #4b81ff;
-}
-
-/* HIGH CONTRAST */
-body.high-contrast-mode {
-    background: #111;
-    color: #fff;
-}
-
-body.high-contrast-mode th,
-body.high-contrast-mode td {
-    border-color: #666;
-}
-
-body.high-contrast-mode .attackable {
-    background: rgba(255, 255, 255, 0.08);
-}
-
-/* LIFE BAR (NO GREEN ANYWHERE) */
+/* LIFE BAR */
 .life-bar {
     width: 100%;
     height: 10px;
@@ -150,52 +107,16 @@ body.high-contrast-mode .attackable {
     transition: width 0.3s ease;
 }
 
-/* color states */
-.life-fill.high {
-    background: #4b81ff; /* healthy */
-}
-
-.life-fill.mid {
-    background: #ffcc00; /* medium */
-}
-
-.life-fill.low {
-    background: #ff4444; /* danger */
-}
-
 /* BUTTON */
 .btn {
     background: #ff4444;
     color: white;
     padding: 5px 10px;
     border-radius: 4px;
-    text-decoration: none;
-    font-weight: bold;
-    display: inline-block;
 }
 
-.btn:hover { background: #ff2222; }
-
-/* ONLINE STATUS */
-.online {
-    color: #4b81ff;
-    font-weight: bold;
-}
-
-.idle { color: #cccccc; }
-
-body.colorblind-mode .online {
-    color: #ffd84d;
-    background: rgba(255, 216, 77, 0.12);
-    border: 1px solid #ffd84d;
-    border-radius: 999px;
-    padding: 1px 8px;
-}
-
-#status {
-    margin-top: 10px;
-    color: #cccccc;
-}
+/* STATUS */
+#status { color: #ccc; }
 </style>
 </head>
 
@@ -206,212 +127,123 @@ body.colorblind-mode .online {
 
 <div class="display-options">
     <label class="toggle-option">
-        <input type="checkbox" id="colorBlindMode">
-        Color blind mode
-    </label>
-
-    <label class="toggle-option">
-        <input type="checkbox" id="highContrastMode">
-        High contrast
+        <input type="checkbox" id="colorBlindToggle">
+        Colorblind Mode (ON/OFF)
     </label>
 </div>
 
-<div class="legend">
-    <span class="legend-item"><span class="legend-swatch online"></span> Online</span>
-    <span class="legend-item"><span class="legend-swatch attackable"></span> Attackable target</span>
-    <span class="legend-item"><span class="legend-swatch colorblind"></span> Color blind marker</span>
-</div>
-
-<form id="loginForm" class="controls">
-
-    <label>
-        API Key:
-        <input type="text" id="apiKey">
-    </label>
-
-    <label>
-        Faction ID:
-        <input type="text" id="factionId">
-    </label>
-
-    <button type="submit">Load</button>
-
-    <label>
-        Min Level:
-        <input type="number" id="minLevel" value="0">
-    </label>
-
-    <label>
-        Max Level:
-        <input type="number" id="maxLevel" value="999">
-    </label>
-
-    <label>
-        Sort:
-        <select id="sortDir">
-            <option value="asc">Ascending</option>
-            <option value="desc">Descending</option>
-        </select>
-    </label>
-
-    <button type="button" onclick="toggleHittable()">Hittable NOW</button>
-    <button type="button" onclick="loadMembers()">Refresh</button>
+<form id="loginForm">
+    <input id="apiKey" placeholder="API Key">
+    <input id="factionId" placeholder="Faction ID">
+    <button>Load</button>
 </form>
 
 <table>
 <thead>
 <tr>
     <th>Name</th>
-    <th>Age</th>
     <th>Level</th>
     <th>Online</th>
     <th>Life</th>
     <th>Status</th>
-    <th>Action</th>
 </tr>
 </thead>
-
 <tbody id="results"></tbody>
 </table>
 
 <script>
 
 let membersCache = [];
-let factionName = "";
-let hittableMode = false;
+
+/* =========================
+   TOGGLE MODE
+   ========================= */
+
+document.getElementById("colorBlindToggle").addEventListener("change", (e) => {
+    document.body.classList.toggle("colorblind", e.target.checked);
+    renderTable();
+});
+
+/* =========================
+   LOAD DATA
+   ========================= */
 
 document.getElementById("loginForm").addEventListener("submit", e => {
     e.preventDefault();
     loadMembers();
 });
 
-function lifePercent(cur, max) {
-    return Math.min(100, Math.round((cur / max) * 100));
-}
-
-function getLifeClass(percent) {
-    if (percent < 30) return "low";
-    if (percent < 70) return "mid";
+function lifeClass(p) {
+    if (p < 30) return "low";
+    if (p < 70) return "mid";
     return "high";
-}
-
-function timeAgo(ts) {
-    const now = Math.floor(Date.now() / 1000);
-    const diff = now - ts;
-
-    if (diff < 300) return "Online";
-    if (diff < 3600) return `${Math.floor(diff / 60)}m ago`;
-    if (diff < 86400) return `${Math.floor(diff / 3600)}h ago`;
-    return `${Math.floor(diff / 86400)}d ago`;
 }
 
 async function loadMembers() {
 
-    const apiKey = document.getElementById("apiKey").value;
-    const factionId = document.getElementById("factionId").value;
+    const apiKey = apiKey.value;
+    const factionId = factionId.value;
 
-    const status = document.getElementById("status");
+    const res = await fetch(`https://api.torn.com/faction/${factionId}?selections=basic&key=${apiKey}`);
+    const data = await res.json();
 
-    if (!apiKey || !factionId) {
-        status.textContent = "Enter API Key + Faction ID.";
-        return;
-    }
+    const entries = Object.entries(data.members);
 
-    status.textContent = "Loading...";
+    membersCache = await Promise.all(entries.map(async ([id, m]) => {
 
-    try {
-        const res = await fetch(
-            `https://api.torn.com/faction/${factionId}?selections=basic&key=${apiKey}`
-        );
+        const u = await fetch(`https://api.torn.com/user/${id}?selections=profile&key=${apiKey}`).then(r => r.json());
 
-        const data = await res.json();
+        return {
+            id,
+            name: m.name,
+            level: m.level,
+            life: u.life?.current || 0,
+            max: u.life?.maximum || 1,
+            last: u.last_action?.timestamp || 0
+        };
+    }));
 
-        factionName = data.name;
-        const entries = Object.entries(data.members);
-
-        membersCache = await Promise.all(entries.map(async ([id, m]) => {
-
-            const res = await fetch(
-                `https://api.torn.com/user/${id}?selections=profile&key=${apiKey}`
-            );
-            const u = await res.json();
-
-            const now = Math.floor(Date.now() / 1000);
-
-            return {
-                id,
-                name: m.name,
-                level: m.level,
-                age: u.age,
-                lifeCurrent: u.life?.current || 0,
-                lifeMax: u.life?.maximum || 1,
-                lastAction: u.last_action?.timestamp || 0,
-                online: (now - u.last_action?.timestamp) <= 300,
-                attackable: m.status?.description === "Okay"
-            };
-        }));
-
-        renderTable();
-
-    } catch (e) {
-        status.textContent = "Failed to load.";
-    }
+    renderTable();
 }
+
+/* =========================
+   RENDER
+   ========================= */
 
 function renderTable() {
 
     const tbody = document.getElementById("results");
-    const min = +document.getElementById("minLevel").value;
-    const max = +document.getElementById("maxLevel").value;
-    const sort = document.getElementById("sortDir").value;
-
-    let data = membersCache.filter(m =>
-        m.level >= min && m.level <= max
-    );
-
-    data.sort((a,b)=> sort === "asc" ? a.level - b.level : b.level - a.level);
-
     tbody.innerHTML = "";
 
-    data.forEach(m => {
+    membersCache.forEach(m => {
 
-        if (hittableMode && !m.attackable) return;
+        const percent = Math.round((m.life / m.max) * 100);
+        const cls = lifeClass(percent);
 
-        const percent = lifePercent(m.lifeCurrent, m.lifeMax);
-        const lifeClass = getLifeClass(percent);
+        const online = (Date.now()/1000 - m.last) < 300
+            ? `<span class="online">Online</span>`
+            : "Offline";
 
         const row = document.createElement("tr");
-        if (m.attackable) row.classList.add("attackable");
 
         row.innerHTML = `
             <td>${m.name}</td>
-            <td>${m.age}</td>
             <td>${m.level}</td>
-            <td class="online">${m.online ? "Online" : timeAgo(m.lastAction)}</td>
+            <td>${online}</td>
             <td>
-                ${m.lifeCurrent}/${m.lifeMax}
+                ${m.life}/${m.max}
                 <div class="life-bar">
-                    <div class="life-fill ${lifeClass}" style="width:${percent}%"></div>
+                    <div class="life-fill ${cls}" style="width:${percent}%"></div>
                 </div>
             </td>
-            <td>${m.attackable ? "Attackable" : "Safe"}</td>
-            <td><a class="btn" target="_blank"
-               href="https://www.torn.com/profiles.php?XID=${m.id}">Attack</a></td>
+            <td>OK</td>
         `;
 
         tbody.appendChild(row);
     });
 
-    document.getElementById("title").textContent =
-        `Faction War Targets - ${factionName}`;
-
     document.getElementById("status").textContent =
-        `Loaded ${data.length} members`;
-}
-
-function toggleHittable() {
-    hittableMode = !hittableMode;
-    renderTable();
+        `Loaded ${membersCache.length} members`;
 }
 
 </script>
