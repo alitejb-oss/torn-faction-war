@@ -392,9 +392,13 @@ function renderTable() {
 
     tbody.innerHTML = "";
 
+    let attackableCount = 0;
+
     data.forEach(m => {
 
         if (hittableMode && !m.attackable) return;
+
+        if (m.attackable) attackableCount++;
 
         const percent = lifePercent(m.lifeCurrent, m.lifeMax);
         const hospitalTime = formatHospitalTime(m.statusUntil);
@@ -446,7 +450,7 @@ function renderTable() {
         `Faction War Targets - ${factionName}`;
 
     document.getElementById("status").textContent =
-        `Loaded ${data.length} members`;
+        `Loaded ${data.length} members (${attackableCount} attackable)`;
 }
 
 /* =========================
