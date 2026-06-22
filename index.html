@@ -53,6 +53,11 @@ tr:nth-child(even) { background: #252525; }
     background: rgba(0, 255, 0, 0.08);
 }
 
+.non-attackable {
+    background: rgba(0, 0, 0, 0);
+    color: #808080;
+}
+
 .top-level {
     box-shadow: inset 0 0 10px rgba(255, 215, 0, 0.4);
     border-left: 3px solid gold;
@@ -167,8 +172,8 @@ body.colorblind .attackable {
         </select>
     </label>
 
-    <button type="button" onclick="toggleHittable()">🔴 Hittable NOW</button>
-    <button type="button" onclick="toggleColorBlind()" class="toggle-btn" id="colorblindBtn">🎨 Color Blind Mode</button>
+    <button type="button" onclick="toggleHittable()">🟢 Hittable NOW</button>
+    <button type="button" onclick="toggleColorBlind()" class="toggle-btn" id="colorblindBtn"> Color Blind Mode</button>
     <button type="button" onclick="loadMembers()">Refresh</button>
 
 </form>
@@ -196,6 +201,7 @@ let factionName = "";
 let hittableMode = false;
 let colorblindMode = false;
 let countdownIntervals = {};
+let chain = {};
 
 /* =========================
    LOGIN + AUTO LOGIN
@@ -328,10 +334,11 @@ async function loadMembers() {
 
     try {
         const res = await fetch(
-            `https://api.torn.com/faction/${factionId}?selections=basic&key=${apiKey}`
+            `https://api.torn.com/faction/${factionId}?selections=basic,chain&key=${apiKey}`
         );
 
         const data = await res.json();
+	     chain = data.chain || {};
 
         if (data.error) {
             status.textContent = data.error.error;
@@ -405,36 +412,38 @@ function renderTable() {
 
         const row = document.createElement("tr");
 
-        if (m.attackable) row.classList.add("attackable");
-
-        const statusCell = document.createElement("td");
-        statusCell.id = `status-${m.id}`;
-
-        if (m.statusState === "Okay") {
-            statusCell.textContent = "Okay";
-        } else {
-            statusCell.textContent = `${m.statusState} (${hospitalTime})`;
-            
-            // Start countdown timer for this member
-            startCountdown(m.id, m.statusUntil);
+        if (m.attackable) {
+           row.classList.add("attackable");
+        }  else {
+           row.classList.add("non-attackable");
         }
+
+       let statusText;
+
+       if (m.statusState === "Okay") {
+           statusText = "Okay";
+       } else {
+           statusText = `${m.statusState} (${hospitalTime})`;
+           startCountdown(m.id, m.statusUntil);
+       }
 
         row.innerHTML = `
             <td>${m.name}</td>
             <td>${m.age}</td>
             <td>${m.level}</td>
-            <td>${timeAgo(m.lastAction)}</td>
+            <td>
+                ${m.online
+                    ? `<span class="online">Online</span>`
+                    : timeAgo(m.lastAction)
+                }
+            </td>
             <td>
                 ${m.lifeCurrent}/${m.lifeMax}
                 <div class="life-bar">
                     <div class="life-fill" style="width:${percent}%"></div>
                 </div>
             </td>
-        `;
-
-        row.appendChild(statusCell);
-
-        row.innerHTML += `
+            <td id="status-${m.id}">${statusText}</td>
             <td>
                 <a class="btn" target="_blank"
                    href="https://www.torn.com/profiles.php?XID=${m.id}">
@@ -442,15 +451,31 @@ function renderTable() {
                 </a>
             </td>
         `;
-
+  
         tbody.appendChild(row);
     });
 
     document.getElementById("title").textContent =
         `Faction War Targets - ${factionName}`;
 
+    const chainHits = chain.current || 0;
+    const chainMax = chain.max || 0;
+    const chainTime = chain.timeout || 0;
+
+    let chainText = "No chain";
+
+    if (chainMax > 0) {
+       const now = Math.floor(Date.now() / 1000);
+       const remaining = Math.max(0, chainTime - now);
+
+       const m = Math.floor(remaining / 60);
+       const s = remaining % 60;
+
+       chainText = `Chain: ${chainHits}/${chainMax} ${m}:${s.toString().padStart(2,'0')}`;
+    }
+
     document.getElementById("status").textContent =
-        `Loaded ${data.length} members (${attackableCount} attackable)`;
+         `${chainText} | Loaded ${data.length} members (${attackableCount} attackable)`;
 }
 
 /* =========================
